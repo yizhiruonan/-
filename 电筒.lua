@@ -1,4 +1,5 @@
 local Script = {}
+道具id = "r2_7610354416678439572_62704"
 --属性定义
 Script.propertys = {
 循环频率 = {
@@ -36,17 +37,6 @@ Script.propertys = {
 	-- tips = "这是一个脚本组件的数值属性变量",
 },
 
---[[每分钟消耗耐久 = {
-	type = Mini.Number,-- 类型
-	default = 100,-- 默认值
-	displayName = "每分耗耐久",-- 属性别名
-	sort = 4, -- 属性排序
-	minValue = 0, -- 最小值
-	-- maxValue = 1000,-- 最大值
-	format = "每分钟消耗%.0f耐久度",  -- 单位，可不填 %.0f 整数, %.1f 一位小数
-	style = ComponentUIStyle.NumberSlider,--属性控件样式滑动条
-	-- tips = "这是一个脚本组件的数值属性变量",
-},--]]
 照明距离 = {
 	type = Mini.Number,-- 类型
 	default = 20,-- 默认值
@@ -69,9 +59,6 @@ function Script:删除光源(uin, postab)
 
     for k ,v in ipairs(postab) do
         World:SetLightByPos(v.x, v.y, v.z, 0, WorldId)
-        --[[if k % 10 == 0 then
-            self:ThreadWait(0.05)
-        end--]]
     end
 end
 
@@ -131,26 +118,27 @@ end
 
 function Script:开启电筒(uin)
     local Cpitch, Cyaw = 0, 0
-    local pitch, yaw = 0, 0
     local Cx, Cy, Cz = 0, 0, 0
-    local x, y, z = 0, 0, 0
     local toolID = 0
     local postab = self.V.uin.位置表 or {}
     local T = self.循环频率
 
     while self.V.uin.循环开关 do
-        x, y, z = Actor:GetPosition(uin)
-        pitch, yaw = Actor:GetFacePitch(uin), Actor:GetFaceYaw(uin)
         toolID = Player:GetCurToolID(uin)
-        if (x ~= Cx or y ~= Cy or z ~= Cz or pitch ~= Cpitch or yaw ~= Cyaw) and toolID == "r2_7610354416678439572_62704" then
-            local 新postab = {}
-            self:创建光源(uin, 新postab, x, y + 1.5, z, math.rad(pitch), math.rad(yaw))
-            self:动态更新光源(uin, postab, 新postab)
-            postab = 新postab
-            Cx, Cy, Cz = x, y, z
-            Cpitch, Cyaw = pitch, yaw
-        elseif toolID ~= "r2_7610354416678439572_62704" then
+        if toolID == 道具id then
+            local x, y, z = Actor:GetPosition(uin)
+            local pitch, yaw = Actor:GetFacePitch(uin), Actor:GetFaceYaw(uin)
+            if (x ~= Cx or y ~= Cy or z ~= Cz or pitch ~= Cpitch or yaw ~= Cyaw) then
+                local 新postab = {}
+                self:创建光源(uin, 新postab, x, y + 1.5, z, math.rad(pitch), math.rad(yaw))
+                self:动态更新光源(uin, postab, 新postab)
+                postab = 新postab
+                Cx, Cy, Cz = x, y, z
+                Cpitch, Cyaw = pitch, yaw
+            end
+        else
             self:删除光源(uin, postab)
+            Cx, Cy, Cz = 0, 0, 0
         end
         self:ThreadWait(T)
     end
@@ -160,6 +148,10 @@ end
 
 function Script:使用道具(e)
     local uin = e.eventobjid
+    if e.itemid ~= 道具id then
+        return
+    end
+
     self.V.uin.循环开关 = not (self.V.uin.循环开关 or false)
     self.V.uin.位置表 = self.V.uin.位置表 or {}
 
