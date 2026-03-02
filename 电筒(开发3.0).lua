@@ -113,17 +113,17 @@ function Script:动态更新光源(uin, 老postab, 新postab)
         self:删除光源(uin, del)
     end
     
-    self.V.uin.位置表 = 新postab
+    self.V[uin].位置表 = 新postab
 end
 
 function Script:开启电筒(uin)
     local Cpitch, Cyaw = 0, 0
     local Cx, Cy, Cz = 0, 0, 0
     local toolID = 0
-    local postab = self.V.uin.位置表 or {}
+    local postab = self.V[uin].位置表 or {}
     local T = self.循环频率
 
-    while self.V.uin.循环开关 do
+    while self.V[uin].循环开关 do
         toolID = Player:GetCurToolID(uin)
         if toolID == 道具id then
             local x, y, z = Actor:GetPosition(uin)
@@ -152,10 +152,11 @@ function Script:使用道具(e)
         return
     end
 
-    self.V.uin.循环开关 = not (self.V.uin.循环开关 or false)
-    self.V.uin.位置表 = self.V.uin.位置表 or {}
+    self.V[uin] = self.V[uin] or {}
+    self.V[uin].循环开关 = not (self.V[uin].循环开关 or false)
+    self.V[uin].位置表 = self.V[uin].位置表 or {}
 
-    if self.V.uin.循环开关 then
+    if self.V[uin].循环开关 then
         self:ThreadWork(function()
             self:开启电筒(uin)
         end)
@@ -177,7 +178,7 @@ end
 
 function Script:进入游戏(e)
     local uin = e.eventobjid
-    self.V.uin = self.V.uin or {}
+    self.V[uin] = self.V[uin] or {}
 end
 
 -- 组件启动时调用
