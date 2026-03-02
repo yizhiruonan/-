@@ -56,28 +56,28 @@ function 动态更新光源(uin, 老postab, 新postab)
     for _, v in ipairs(新postab) do
         哈希表[v.x..","..v.y..","..v.z] = true
     end
-    
+
     for _, v in ipairs(老postab) do
         if not 哈希表[v.x..","..v.y..","..v.z] then
             table.insert(del, v)
         end
     end
-    
+
     if #del > 0 then
         删除光源(uin, del)
     end
-    
-    V.uin.位置表 = 新postab
+
+    V[uin].位置表 = 新postab
 end
 
 function 开启电筒(uin)
     local Cpitch, Cyaw = 0, 0
     local Cx, Cy, Cz = 0, 0, 0
     local toolID = 0
-    local postab = V.uin.位置表 or {}
+    local postab = V[uin].位置表 or {}
     local T = C.循环频率
 
-    while V.uin.循环开关 do
+    while V[uin].循环开关 do
         _, toolID = Player:getCurToolID(uin)
         if toolID == C.道具id then
             local _, x, y, z = Actor:getPosition(uin)
@@ -107,10 +107,11 @@ function 使用道具(e)
         return
     end
 
-    V.uin.循环开关 = not (V.uin.循环开关 or false)
-    V.uin.位置表 = V.uin.位置表 or {}
+    V[uin] = V[uin] or {}
+    V[uin].循环开关 = not (V[uin].循环开关 or false)
+    V[uin].位置表 = V[uin].位置表 or {}
 
-    if V.uin.循环开关 then
+    if V[uin].循环开关 then
         开启电筒(uin)
         Player:playMusic(uin, 10650, 100, 1, false)
         Player:notifyGameInfo2Self(uin, "#G开启电筒")
@@ -122,7 +123,7 @@ end
 
 function 进入游戏(e)
     local uin = e.eventobjid
-    V.uin = V.uin or {}
+    V[uin] = V[uin] or {}
 end
 
 ScriptSupportEvent:registerEvent([=[Player.UseItem]=], 使用道具)
